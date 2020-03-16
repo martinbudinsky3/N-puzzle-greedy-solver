@@ -4,6 +4,7 @@ import copy
 
 generated_nodes = []
 processed_states = []
+goal_dict = {}
 
 
 class Node:
@@ -16,6 +17,7 @@ class Node:
     def __lt__(self, other):
         return self.dist < other.dist
 
+
 def heuristic1(actual_state, goal_state, m, n):
     wrong_tiles = 0
 
@@ -27,7 +29,7 @@ def heuristic1(actual_state, goal_state, m, n):
     return wrong_tiles
 
 
-def heuristic2(actual_state, goal_dict, m, n):
+def heuristic2(actual_state, m, n):
     manhattan_distance = 0
 
     for i in range(n):
@@ -100,24 +102,24 @@ def move_left(state, m, n):
     return None
 
 
-def choose_heuristic(heur):
+def choose_heuristic(state, goal_state, m, n, heur):
     dist = 0
     if heur == 1:
-        dist = heuristic1(init_state, goal_state, m, n)
+        dist = heuristic1(state, goal_state, m, n)
     elif heur == 2:
-        dist = heuristic2(init_state, goal_state, m, n)
+        dist = heuristic2(state, m, n)
 
     return dist
 
 
-def create_node(state, parent, last_move, heur):
-    dist = choose_heuristic(heur)
+def create_node(state, goal_state, m, n, parent, last_move, heur):
+    dist = choose_heuristic(state, goal_state, m, n, heur)
     node = Node(state, parent, last_move, dist)
 
-    heapq.heappush(generated_nodes, (dist, node))
+    heapq.heappush(generated_nodes, node)
 
 
-def generate_nodes(node, m, n, heur):
+def generate_nodes(node, goal_state, m, n, heur):
     state = node.state
     last_move = node.last_move
 
@@ -127,41 +129,43 @@ def generate_nodes(node, m, n, heur):
     left_state = move_left(state, m, n)
 
     if up_state not in processed_states and up_state is not None and last_move != "D":
-        create_node(up_state, node, "U", heur)
+        create_node(up_state, goal_state, m, n, node, "U", heur)
 
     if down_state not in processed_states and down_state is not None and last_move != "U":
-        create_node(down_state, node, "D", heur)
+        create_node(down_state, goal_state, m, n, node, "D", heur)
 
     if right_state not in processed_states and right_state is not None and last_move != "L":
-        create_node(right_state, node, "R", heur)
+        create_node(right_state, goal_state, m, n, node, "R", heur)
 
     if left_state not in processed_states and left_state is not None and last_move != "R":
-        create_node(left_state, node, "L", heur)
+        create_node(left_state, goal_state, m, n, node, "L", heur)
 
 
 def greedy(init_state, goal_state, m, n, heur):
-    create_node(init_state, None, None, heur)
-    while generated_nodes != []:
-        dist_node = heapq.heappop(generated_nodes)
-        actual_node = dist_node[1]
+    number_of_steps = 0
+
+    create_node(init_state, goal_state, m, n, None, None, heur)
+    while generated_nodes:
+        print("Generated nodes:", len(generated_nodes))
+        print("Processed nodes:", len(processed_states))
+        print()
+
+        actual_node = heapq.heappop(generated_nodes)
         actual_state = actual_node.state
+        processed_states.append(actual_state)
         if actual_state == goal_state:
             return actual_node;
-        generate_nodes(actual_node, m, n, heur)
-        processed_states.append(actual_state)
+
+        generate_nodes(actual_node, goal_state, m, n, heur)
 
     return None
 
 
 def create_goal_state_dict(goal_state, m, n):
-    goal_dict = {}
-
     for i in range(n):
         for j in range(m):
             tile = goal_state[i][j]
             goal_dict[tile] = (j, i)
-
-    return goal_dict
 
 
 def read_state(f, m, n):
@@ -193,13 +197,28 @@ def read_input(file):
     return heur, m, n, init_state, goal_state
 
 
-heur, m, n , init_state, goal_state = read_input("input.txt")
-goal_dict = create_goal_state_dict(goal_state, m, n)
-result = greedy(init_state, goal_state, m, n, heur)
+def print_output(result_node):
+    op_dict = {"U": "UP", "D": "DOWN", "R": "RIGHT", "L": "LEFT"}
+    operators = []
+    actual_node = result_node
+    while actual_node.parent:
+        operators.append(actual_node.last_move)
+        actual_node = actual_node.parent
 
-print(result.state)
-# print(init_state)
-# print(final_state)
+    for i in range(len(operators) - 1, -1, -1):
+        print(op_dict[operators[i]])
+
+    print()
+    print("Total number of nodes:", len(generated_nodes) + len(processed_states))
+
+
+heur, m, n , init_state, goal_state = read_input("input.txt")
+create_goal_state_dict(goal_state, m, n)
+result_node = greedy(init_state, goal_state, m, n, heur)
+print_output(result_node)
+
+# print(result_node.state)
+
 
 
 
