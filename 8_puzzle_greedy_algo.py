@@ -8,7 +8,7 @@ PRINT = 0
 # min heap to store generated nodes, key is heuristic distance estimation
 generated_nodes = []
 # list to store all processed states to avoid duplicates while generating new states
-processed_states = []
+processed_states = {}
 # dictionary to store values:coordinates pairs of goal state
 goal_dict = {}
 
@@ -144,17 +144,16 @@ def generate_nodes(node, goal_state, m, n, heur):
     right_state = move_right(state, m, n)
     left_state = move_left(state, m, n)
 
-    # checking if states were not processed and if used operator was valid
-    if up_state not in processed_states and up_state is not None and last_move != "D":
+    if not processed_states.get(str(up_state), False) and up_state is not None and last_move != "D":
         create_node(up_state, goal_state, m, n, node, "U", heur)
 
-    if down_state not in processed_states and down_state is not None and last_move != "U":
+    if not processed_states.get(str(down_state), False) and down_state is not None and last_move != "U":
         create_node(down_state, goal_state, m, n, node, "D", heur)
 
-    if right_state not in processed_states and right_state is not None and last_move != "L":
+    if not processed_states.get(str(right_state), False) and right_state is not None and last_move != "L":
         create_node(right_state, goal_state, m, n, node, "R", heur)
 
-    if left_state not in processed_states and left_state is not None and last_move != "R":
+    if not processed_states.get(str(left_state), False) and left_state is not None and last_move != "R":
         create_node(left_state, goal_state, m, n, node, "L", heur)
 
 
@@ -164,14 +163,15 @@ def greedy(init_state, goal_state, m, n, heur):
     while generated_nodes:
         if PRINT:
             print("Generated nodes:", len(generated_nodes))
-            print("Processed nodes:", len(processed_states))
+            print("Processed nodes:", len(processed_states.keys()))
             print()
 
         actual_node = heapq.heappop(generated_nodes)  # extracting min node from heap
         actual_state = actual_node.state
-        processed_states.append(actual_state)  # storing state as processed
+        processed_states[str(actual_state)] = True  # storing state as processed
+
         if actual_state == goal_state:  # if goal_state was found function returns node with goal state
-            return actual_node;
+            return actual_node
 
         generate_nodes(actual_node, goal_state, m, n, heur)  # generating all possible succesors
 
@@ -193,7 +193,6 @@ def read_state(f, n):
         line = f.readline()
         row = line.split()
         state.append(row)
-        row = []
 
     return state
 
@@ -217,6 +216,8 @@ def read_input(file):
 def print_output(result_node, start, end):
     if result_node is None:
         print("Solution does not exist")
+        print("Total number of nodes:", len(processed_states.keys()))
+        print("Time: {} s".format(end - start))
         return
 
     op_dict = {"U": "UP", "D": "DOWN", "R": "RIGHT", "L": "LEFT"}
@@ -234,17 +235,18 @@ def print_output(result_node, start, end):
 
     print()
     print("Number of moves:", number_of_ops)
-    print("Total number of nodes:", len(generated_nodes) + len(processed_states))
+    print("Total number of nodes:", len(generated_nodes) + len(processed_states.keys()))
     print("Time: {} s".format(end - start))
 
 
 start = time.perf_counter()
-# heur, m, n , init_state, goal_state = read_input("basic.txt")
+heur, m, n , init_state, goal_state = read_input("basic.txt")
 # heur, m, n , init_state, goal_state = read_input("basic_1.txt")
 # heur, m, n , init_state, goal_state = read_input("input_3x2.txt")
 # heur, m, n , init_state, goal_state = read_input("input_4x2.txt")
-heur, m, n , init_state, goal_state = read_input("input_4x3.txt")
+# heur, m, n , init_state, goal_state = read_input("input_4x3.txt")
 # heur, m, n , init_state, goal_state = read_input("input_5x2.txt")
+
 create_goal_state_dict(goal_state, m, n)
 result_node = greedy(init_state, goal_state, m, n, heur)
 end = time.perf_counter()
