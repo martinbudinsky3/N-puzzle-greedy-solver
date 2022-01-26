@@ -1,3 +1,6 @@
+operators_dict = {"U": "UP", "D": "DOWN", "R": "RIGHT", "L": "LEFT"}
+
+
 class Input:
     def __init__(self, heuristic, width, height, init_state, goal_state):
         self.heuristic = heuristic
@@ -35,26 +38,32 @@ def read_state(f, n):
 
 # function to format and print output
 def print_output(result, start, end):
-    if result.result_node is None:
+    if result.sequence is None:
         print("Solution does not exist")
         print("Total number of nodes:", result.number_of_nodes)
         print("Time: {} s".format(end - start))
         return
 
-    op_dict = {"U": "UP", "D": "DOWN", "R": "RIGHT", "L": "LEFT"}
+    result_sequence = result.sequence
+    init_node = result_sequence.pop(0)
+    print_state(init_node.state)
 
-    number_of_ops = 0
-    operators = []
-    actual_node = result.result_node
-    while actual_node.parent:
-        operators.append(actual_node.last_move)
-        actual_node = actual_node.parent
-        number_of_ops += 1
+    for node in result_sequence:
+        print()
+        print(operators_dict[node.last_move])
+        print()
+        print_state(node.state)
 
-    for i in range(len(operators) - 1, -1, -1):
-        print(op_dict[operators[i]])
+    number_of_ops = len(result_sequence) - 1
 
     print()
     print("Number of moves:", number_of_ops)
     print("Total number of nodes:", result.number_of_nodes)
     print("Time: {} s".format(end - start))
+
+
+def print_state(state):
+    for i in range(len(state)):
+        for j in range(len(state[0])):
+            print(state[i][j], end=" ")
+        print()

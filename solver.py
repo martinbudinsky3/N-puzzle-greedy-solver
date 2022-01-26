@@ -7,9 +7,15 @@ BLANK_TILE = "m"
 
 
 class Result:
-    def __init__(self, result_node, generated_nodes, processed_nodes):
-        self.result_node = result_node
+    def __init__(self, sequence, generated_nodes, processed_nodes):
+        self.sequence = sequence
         self.number_of_nodes = len(generated_nodes) + len(processed_nodes.keys())
+
+
+class ResultNode:
+    def __init__(self, state, last_move):
+        self.state = state
+        self.last_move = last_move
 
 
 # class representing node
@@ -40,8 +46,9 @@ class GreedySolver:
 
         # dictionary to store values:coordinates pairs of goal state
         self.goal_dict = {}
-
         self.create_goal_state_dict()
+
+        self.result_sequence = []
 
     def create_goal_state_dict(self):
         for i in range(self.height):
@@ -62,13 +69,14 @@ class GreedySolver:
             actual_state = actual_node.state
             self.processed_states[str(actual_state)] = True  # storing state as processed
 
-            if actual_state == self.goal_state:  # if goal_state was found function returns node with goal state
-                return Result(actual_node, self.generated_nodes, self.processed_states)
+            # if goal_state was found function returns result with node sequence to goal state
+            if actual_state == self.goal_state:
+                return self.get_result(actual_node)
 
             self.generate_nodes(actual_node)  # generating all possible succesors
 
-        # if algorithm didn't find goal solution function returns None
-        return Result(None, self.generated_nodes, self.processed_states)
+        # if algorithm didn't find goal solution function returns None node sequence
+        return self.get_result(None)
 
     # function that generates all possible new nodes
     def generate_nodes(self, node):
@@ -190,3 +198,18 @@ class GreedySolver:
                 manhattan_distance += (math.fabs(x_goal - x_act) + math.fabs(y_goal - y_act))
 
         return manhattan_distance
+
+    def get_result(self, final_node):
+        result_sequence = None
+        if final_node:
+            result_sequence = []
+            self.get_result_sequence(final_node, result_sequence)
+
+        return Result(result_sequence, self.generated_nodes, self.processed_states)
+
+    def get_result_sequence(self, node, result_sequence):
+        if node.parent is not None:
+            self.get_result_sequence(node.parent, result_sequence)
+
+        result_node = ResultNode(node.state, node.last_move)
+        result_sequence.append(result_node)
