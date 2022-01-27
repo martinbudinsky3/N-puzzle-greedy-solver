@@ -10,7 +10,8 @@ class Input:
         self.goal_state = goal_state
 
 
-def read_input(file_path):
+def read_input():
+    file_path = get_input_params_from_user()
     file = open(file_path, "r")
 
     first_line = file.readline().split()
@@ -23,6 +24,11 @@ def read_input(file_path):
     goal_state = read_state(file, height)
 
     return Input(heuristic, width, height, init_state, goal_state)
+
+
+def get_input_params_from_user():
+    input_file_path = input("Enter path to input file: ")
+    return input_file_path
 
 
 def read_state(f, n):
@@ -42,6 +48,7 @@ def print_output(result, start, end):
         print("Solution does not exist")
         print("Total number of nodes:", result.number_of_nodes)
         print("Time: {} s".format(end - start))
+        print()
         return
 
     result_sequence = result.sequence
@@ -60,6 +67,7 @@ def print_output(result, start, end):
     print("Number of moves:", number_of_ops)
     print("Total number of nodes:", result.number_of_nodes)
     print("Time: {} s".format(end - start))
+    print()
 
 
 def print_state(state):
@@ -67,3 +75,13 @@ def print_state(state):
         for j in range(len(state[0])):
             print(state[i][j], end=" ")
         print()
+
+
+def should_exit():
+    exit_decision = input("Do you want to exit program? [N/y]: ")
+    if exit_decision in ['y', 'Y']:
+        return True
+
+    print()
+    return False
+
