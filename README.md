@@ -8,20 +8,13 @@ Implementation of N-puzzle solver using greedy algorithm.
 ## Input specification
 Currently, only file input is supported.
 
-Input structure is as follows:
+Input is structured as follows:
 
-<code>
-
-**h m n**
-
-\<empty line\>
-
-**initial state**
-
-\<empty line\>
-
+**h m n** <br/>
+\<empty line\> <br/>
+**initial state** <br/>
+\<empty line\> <br/>
 **goal state**
-</code>
 
 , where:
 - h - Heuristic number
@@ -32,13 +25,12 @@ Input structure is as follows:
 
 Input structure of states is as follows:
 
-<code>
-d<sub>0,0</sub> d<sub>1,0</sub> . . . d<sub>m-1,0</sub> </br>
-d<sub>0,1</sub> d<sub>1,1</sub> . . . d<sub>m-1,1</sub> </br>
-.   .   .   .   .   .   . </br>
-.   .   .   .   .   .   . </br>
-d<sub>0,n-1</sub> d<sub>1,n-1</sub> . . . d<sub>m-1,n-1</sub>
-</code>
+
+**d<sub>0,0</sub> d<sub>1,0</sub> . . . d<sub>m-1,0</sub> <br/>**
+**d<sub>0,1</sub> d<sub>1,1</sub> . . . d<sub>m-1,1</sub> <br/>**
+**.   .   .   .   .   .   . <br/>**
+**.   .   .   .   .   .   . <br/>**
+**d<sub>0,n-1</sub> d<sub>1,n-1</sub> . . . d<sub>m-1,n-1</sub>**
 
 , where *d<sub>i,j</sub>* represents number on tile on position [i, j]. Number *d<sub>i,j</sub>* must be from interval <1, m*n-1> and empty tile must be represented by character 'm'.
 
